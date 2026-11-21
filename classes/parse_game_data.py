@@ -56,9 +56,9 @@ def parse_data(data_str: str) -> None:
         if gameclock != "":
             gamedata["gameclock"] = gameclock
 
-        # if shotclock is more then game time -> disable it
-        if gamedata["seconds_shotclock"] > gamedata["seconds_gameclock"]:
-            gamedata["shotclock"] = ""
+        # # if shotclock is more then game time -> disable it
+        # if gamedata["seconds_shotclock"] > gamedata["seconds_gameclock"]:
+        #     gamedata["shotclock"] = ""
 
     if indicator_teamfouls in data_str:
         # update teamfouls
