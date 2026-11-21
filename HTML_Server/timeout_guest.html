@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Huninn&display=swap" rel="stylesheet">
+    
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auszeit Heim</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: transparent;
+    }
+
+    .overlay {
+        position: fixed;
+        width: 1920px;
+        height: 1080px;
+        background: transparent;
+    }
+
+    .textbox {
+        position: absolute;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        bottom: 174px;
+        left: 174px;
+
+        width: 640px;
+        height: 100px;
+
+        transform: scale(0.7);
+        transform-origin: bottom left;
+
+        /* padding: 20px 25px; */
+
+        background: rgba(223, 223, 223, 0.8);
+        color: black;
+
+        font-family: "Huninn", sans-serif;
+        font-size: 70px;
+        font-weight: bold;
+        line-height: 1.4;
+
+        /* border-radius: 8px; */
+    }
+</style>
+</head>
+
+<body>
+    <div class="overlay">
+        <div class="textbox">
+            Auszeit Gast
+        </div>
+    </div>
+</body>
+</html>

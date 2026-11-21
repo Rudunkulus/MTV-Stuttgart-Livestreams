@@ -1,0 +1,135 @@
+<!-- Author: Ruben Leidel
+ This script reads a json file with basketball gamedata and creates a html
+ site with the overlay for a livestream to be imported in OBS -->
+
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Huninn&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --background-colour: rgba(223, 223, 223, 0.8);
+            --text-colour: #000000;
+            --shotclock-text-colour: #000000;
+            --shotclock-background-colour: #FFFFFF;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        .overlay {
+            position: fixed;
+            width: 1920px;
+            height: 1080px;
+            background: transparent;
+        }
+
+        .textbox {
+            position: absolute;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            bottom: 20px;
+            left: 20px;
+
+            width: 560px;
+            height: 100px;
+
+            transform: scale(0.7);
+            transform-origin: bottom left;
+
+            /* padding: 20px 25px; */
+
+            background: rgba(223, 223, 223, 0.8);
+            color: black;
+
+            font-family: "Huninn", sans-serif;
+            font-size: 70px;
+            font-weight: bold;
+            line-height: 1.4;
+
+            /* border-radius: 8px; */
+        }
+
+
+        /* Gameclock */
+        #gameclock {
+            left: 412px;
+            bottom: 20px;
+            width: 200px;
+            height: 100px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="overlay">
+
+    <!-- left part of overlay -->
+    <div id="overlay_left">
+        <div class="textbox" id="gameclock">10:00</div>
+        <div class="textbox"> Spiel beginnt in: </div>
+    </div>
+</div>
+
+    <script>
+        // config is loaded one time at the start
+        async function loadConfig() {
+            try {
+                const response = await fetch("config.json");
+
+                if (!response.ok) {
+                    throw new Error("couldn't load config.json");
+                }
+
+                const config = await response.json();
+            } catch (error) {
+                console.error("Error on loading config:", error);
+            }
+        }
+
+        // gamedata is refreshed at 10 Hz
+        async function updateOverlay() {
+            try {
+
+                // Cache umgehen und aktuelle Foul-Bilder laden
+                const timestamp = Date.now();
+
+                const response = await fetch("gamedata.json?t=" + Date.now());
+                if (!response.ok) return;
+
+                const data = await response.json();
+
+                document.getElementById("gameclock").textContent =
+                    data.gameclock ?? "";
+            } catch (error) {
+                console.error("Overlay-Daten konnten nicht geladen werden:", error);
+            }
+        }
+
+        loadConfig();
+        updateOverlay();
+        setInterval(updateOverlay, 100);
+    </script>
+
+</body>
+
+</html>

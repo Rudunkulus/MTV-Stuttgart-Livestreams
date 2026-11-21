@@ -1,0 +1,289 @@
+<!-- Author: Ruben Leidel
+ This script reads a json file with basketball gamedata and creates a html
+ site with the overlay for a livestream to be imported in OBS -->
+
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Huninn&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --background-colour: rgba(223, 223, 223, 0.8);
+            --text-colour: #000000;
+            --shotclock-text-colour: #000000;
+            --shotclock-background-colour: #FFFFFF;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        #overlay {
+            position: fixed;
+            left: 20px;
+            bottom: 20px;
+
+            width: 840px;
+            height: 200px;
+
+            transform: scale(0.7);
+            transform-origin: bottom left;
+        }
+
+        /* Linker Bereich */
+        #overlay_left {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+
+            width: 200px;
+            height: 200px;
+
+            background-color: var(--background-colour);
+            
+        }
+
+        /* Rechter Bereich */
+        #overlay_right {
+            position: absolute;
+            left: 220px;
+            top: 0px;
+
+            width: 640px;
+            height: 200px;
+
+            background-color: var(--background-colour);
+        }
+
+        /* Textboxen */
+        .textbox {
+            position: absolute;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            /* Border - only useful for debugging */
+            /* border: 2px solid rgb(0, 255, 42);
+            box-sizing: border-box; */
+
+            font-family: "Huninn", sans-serif;
+            font-size: 65px;
+            font-weight: bold;
+            color: var(--text-color);
+
+            white-space: nowrap;
+        }
+
+        /* Linker Bereich */
+        #gameclock {
+            left: 0px;
+            top: 0px;
+            width: 200px;
+            height: 100px;
+        }
+
+        #quarter {
+            left: 0px;
+            top: 100px;
+            width: 100px;
+            height: 100px;
+        }
+
+        #shotclock {
+            left: 100px;
+            top: 100px;
+            width: 100px;
+            height: 100px;
+            color: var(--shotclock-text-colour);
+            background-color: var(--shotclock-background-colour);
+            border: 5px solid var(--background-colour);
+            box-sizing: border-box;
+        }
+
+        /* Rechter Bereich */
+        #teamname_home {
+            left: 12px;
+            top: 0px;
+            width: 500px;
+            height: 80px;
+            /* font-size: 60px; */
+            white-space: pre-line;
+        }
+
+        #teamname_guest {
+            left: 12px;
+            top: 100px;
+            width: 500px;
+            height: 80px;
+            /* font-size: 60px; */
+            white-space: pre-line;
+        }
+
+        #score_home {
+            left: 512px;
+            top: 0px;
+            width: 120px;
+            height: 100px;
+            justify-content: flex-end;
+        }
+
+        #score_guest {
+            left: 512px;
+            top: 100px;
+            width: 120px;
+            height: 100px;
+            justify-content: flex-end;
+        }
+
+        /* Trikotfarben */
+        .jersey_colours {
+            position: absolute;
+            left: 0px;
+            width: 12px;
+            height: 100px;
+        }
+
+        .jersey_home {
+            top: 0px;
+            background-color: #ff0000;
+        }
+
+        .jersey_guest {
+            top: 100px;
+            background-color: #000080;
+        }
+
+        /* Fouls */
+        .fouls_image {
+            position: absolute;
+            width: 480px;
+            height: 20px;
+            object-fit: contain;
+            border: none;
+        }
+
+        #fouls_home {
+            left: 22px;
+            top: 80px;
+        }
+
+        #fouls_guest {
+            left: 22px;
+            top: 180px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="overlay">
+
+    <!-- left part of overlay -->
+    <div id="overlay_left">
+        <div class="textbox" id="gameclock">10:00</div>
+        <div class="textbox" id="quarter">Q1</div>
+        <div class="textbox" id="shotclock">24</div>
+    </div>
+
+    <!-- right part of overlay -->
+    <div id="overlay_right">
+        <div class="textbox" id="score_home">0</div>
+        <div class="textbox" id="score_guest">0</div>
+
+        <div class="textbox" id="teamname_home">Team A</div>
+        <div class="textbox" id="teamname_guest">Team B</div>
+
+        <div class="jersey_colours jersey_home"></div>
+        <div class="jersey_colours jersey_guest"></div>
+
+        <img id="fouls_home" class="fouls_image" src="fouls_home.png">
+        <img id="fouls_guest" class="fouls_image" src="fouls_guest.png">
+    </div>
+
+</div>
+
+    <script>
+        // config is loaded one time at the start
+        async function loadConfig() {
+            try {
+                const response = await fetch("config.json");
+
+                if (!response.ok) {
+                    throw new Error("couldn't load config.json");
+                }
+
+                const config = await response.json();
+
+                // load team names
+                document.getElementById("teamname_home").textContent = config.teamname_home;
+                document.getElementById("teamname_guest").textContent = config.teamname_guest;
+
+                // fill jersey colours
+                document.querySelector(".jersey_home").style.backgroundColor = config.color_home;
+                document.querySelector(".jersey_guest").style.backgroundColor = config.color_guest;
+
+            } catch (error) {
+                console.error("Error on loading config:", error);
+            }
+        }
+
+        // gamedata is refreshed at 10 Hz
+        async function updateOverlay() {
+            try {
+
+                // Cache umgehen und aktuelle Foul-Bilder laden
+                const timestamp = Date.now();
+
+                const response = await fetch("gamedata.json?t=" + Date.now());
+                if (!response.ok) return;
+
+                const data = await response.json();
+
+                document.getElementById("score_home").textContent =
+                    data.score_home ?? 0;
+
+                document.getElementById("score_guest").textContent =
+                    data.score_guest ?? 0;
+
+                document.getElementById("quarter").textContent =
+                    data.quarter ?? "";
+
+                document.getElementById("gameclock").textContent =
+                    data.gameclock ?? "";
+
+                document.getElementById("shotclock").textContent =
+                    data.shotclock ?? "";
+
+                document.getElementById("fouls_home").src =
+                    "fouls_home.png?t=" + timestamp;
+
+                document.getElementById("fouls_guest").src =
+                    "fouls_guest.png?t=" + timestamp;
+            } catch (error) {
+                console.error("Overlay-Daten konnten nicht geladen werden:", error);
+            }
+        }
+
+        loadConfig();
+        updateOverlay();
+        setInterval(updateOverlay, 100);
+    </script>
+
+</body>
+
+</html>

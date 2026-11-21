@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Huninn&display=swap" rel="stylesheet">
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: transparent;
+}
+
+:root {
+    --background-colour: rgba(223, 223, 223, 0.8);
+    --text-colour: #000000;
+}
+
+#overlay {
+    position: absolute;
+    left: 50%;
+    top: 20px;
+    transform: translateX(-50%);
+
+    width: 1500px;
+
+    background: var(--background-colour);
+    color: var(--text-colour);
+
+    font-family: "Huninn", sans-serif;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+th, td {
+    padding: 9px 14px;
+    text-align: center;
+    white-space: nowrap;
+    border-bottom: 2px solid rgba(0,0,0,0.15);
+}
+
+th {
+    background: rgba(0,0,0,0.10);
+    font-size: 23px;
+}
+
+td:nth-child(2),
+th:nth-child(2) {
+    text-align: left;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+</style>
+</head>
+
+<body>
+
+<div id="overlay">
+    <!-- <div id="title">LIGATABELLE</div> -->
+
+    <table id="table">
+        <thead></thead>
+        <tbody></tbody>
+    </table>
+
+    <!-- <div id="updated"></div> -->
+</div>
+
+<script>
+
+async function loadTable() {
+    const response = await fetch("standings.json");
+    if (!response.ok) throw new Error("JSON konnte nicht geladen werden");
+
+    const data = await response.json();
+
+    const thead = document.querySelector("#table thead");
+    const tbody = document.querySelector("#table tbody");
+
+    // Vorhandene Inhalte leeren
+    thead.replaceChildren();
+    tbody.replaceChildren();
+
+    // Erste JSON-Zeile als Tabellenüberschrift
+    const header = document.createElement("tr");
+
+    data.rows[0].forEach(value => {
+        const th = document.createElement("th");
+        th.textContent = value;
+        header.appendChild(th);
+    });
+
+    thead.appendChild(header);
+
+    // Alle weiteren JSON-Zeilen als Tabelleninhalt
+    data.rows.slice(1).forEach(row => {
+        const tr = document.createElement("tr");
+
+        row.forEach(value => {
+            const td = document.createElement("td");
+            td.textContent = value;
+            tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById("updated").textContent =
+        "Stand: " + data.updated_at;
+}
+
+loadTable().catch(console.error);
+</script>
+
+</body>
+</html>
