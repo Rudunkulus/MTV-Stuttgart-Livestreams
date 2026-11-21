@@ -8,15 +8,15 @@ import requests
 
 # Liga auswählen (aus/ein-kommentieren)
 # Herren 1
-# URL = (
-#     "https://www.basketball-bund.net/public/tabelle.jsp"
-#     "?print=1&viewDescKey=sport.dbb.views.TabellePublicView/index.jsp_&liga_id=53088"
-# )
-# Herren 2
 URL = (
-    "https://www.basketball-bund.net/public/tabelle.jsp?print=1&"
-    "viewDescKey=sport.dbb.views.TabellePublicView/index.jsp_&liga_id=53322"
+    "https://www.basketball-bund.net/public/tabelle.jsp"
+    "?print=1&viewDescKey=sport.dbb.views.TabellePublicView/index.jsp_&liga_id=53088"
 )
+# Herren 2
+# URL = (
+#     "https://www.basketball-bund.net/public/tabelle.jsp?print=1&"
+#     "viewDescKey=sport.dbb.views.TabellePublicView/index.jsp_&liga_id=53322"
+# )
 # anderes Team
 # URL = (
 #     ""
